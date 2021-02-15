@@ -1,4 +1,4 @@
-// MAIN BIDDING FUNCTION MAIN BIDDING FUNCTION
+<?php
 
 // this function performs no checking on the input variables
 
@@ -431,4 +431,4 @@ function place_bin($username, $password, $item, $link) {
     return $success;
 
 }
-
+?>
