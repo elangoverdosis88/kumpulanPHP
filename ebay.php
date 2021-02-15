@@ -12,34 +12,22 @@
 
 function place_bin($username, $password, $item, $link) {
 
- 
-
    $cookies = dirname(__FILE__).'/cookies.txt';
 //$cookies = include('./cookies.txt');
      
 
     //set success as default false
-
     $success = false;
-
     $bid_success = false;
 
  
-
     $curl = curl_init();
-
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
     curl_setopt($curl, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; rv:15.0) Gecko/20100101 Firefox/15.0.1');
-
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-
     curl_setopt($curl, CURLOPT_REFERER, $link);
-
     curl_setopt($curl, CURLOPT_COOKIEFILE, $cookies);
-
     curl_setopt($curl, CURLOPT_COOKIEJAR, $cookies);
 
      
@@ -57,7 +45,6 @@ function place_bin($username, $password, $item, $link) {
     //query the sign-in page to set the cookies
 
     curl_setopt($curl, CURLOPT_URL, 'http://signin.ebay.com/aw-cgi/eBayISAPI.dll?SignIn&campid=5337161990&customid=7');
-
     curl_exec ($curl);
 
      
@@ -65,11 +52,8 @@ function place_bin($username, $password, $item, $link) {
     //query the referal link page
 
     if ($link) {
-
         curl_setopt($curl, CURLOPT_URL, $link);
-
         $ret = curl_exec ($curl);
-
     }
 
      
@@ -77,33 +61,19 @@ function place_bin($username, $password, $item, $link) {
     //sign-in
 
     curl_setopt($curl, CURLOPT_URL, "http://signin.ebay.com/aw-cgi/eBayISAPI.dll?MfcISAPICommand=SignInWelcome&siteid=0&co_partnerId=2&UsingSSL=0&ru=&pp=&pa1=&pa2=&pa3=&i1=-1&pageType=-1&userid={$username}&pass={$password}");
-
     $ret = curl_exec ($curl);
-
     if(curl_errno($curl)){
-
         ebaylog('Curl error: ' . curl_error($curl));
-
     }
-
     if (!$ret) {
-
         $ret = curl_exec ($curl);
-
         if(curl_errno($curl)){
-
             ebaylog('Curl error: ' . curl_error($curl));
-
         }
-
         if (!$ret) {
-
             $ret = curl_exec ($curl);
-
             if(curl_errno($curl)){
-
                 ebaylog('Curl error: ' . curl_error($curl));
-
             }
 
         }
@@ -113,49 +83,28 @@ function place_bin($username, $password, $item, $link) {
      
 
     if (strpos($ret, '"loggedIn":true') === FALSE) {
-
         if (preg_match('%<b class="altTitle">(.*)</b>%', $ret, $regs)) {
-
             $err = $regs[1];
-
             ebaylog("\"{$err}\"");
-
             if (strpos($err, 'The alerts below') === 0) {
-
                 ebaylog("{$item}: 'The alerts below' found, successful");
-
                 //set it to succes
-
             }
-
         } else {
-
             ebaylog("{$item}: Failed signing in");
-
             if (preg_match('%<font face=".*?" size="3"><b>(.*?)</b></font>%', $ret, $regs)) {
-
                 $err = $regs[1];
-
                 ebaylog("\"{$err}\"");
 
             }
 
-             
-
+           
             //test_write($ret);
-
             goto end;
-
         }
 
-         
-
-         
-
     } else {
-
         ebaylog("{$item}: Success signing in");
-
     }
 
      
@@ -165,19 +114,12 @@ function place_bin($username, $password, $item, $link) {
     //place the initial bin
 
     curl_setopt($curl, CURLOPT_URL, "http://offer.ebay.com/ws/eBayISAPI.dll?BinConfirm&item={$item}&quantity=1&campid=5337161990&customid=7");
-
     $ret = curl_exec ($curl);
-
     if(curl_errno($curl)){
-
         ebaylog('Curl error: ' . curl_error($curl));
-
     }
-
     if (!$ret) {
-
         $ret = curl_exec ($curl);
-
     }
 
  
@@ -185,9 +127,7 @@ function place_bin($username, $password, $item, $link) {
      
 
     if (preg_match_all('/(?:value="([-0-9a-zA-Z]*)" *)?name="stok"(?: *value="([-0-9a-zA-Z]*)")?/', $ret, $regs)) {
-
         $stok = $regs[1][0];
-
     } else {
 
         //Failed to get 'stok' value
@@ -199,53 +139,35 @@ function place_bin($username, $password, $item, $link) {
         //check if immediate paypal checkout required
 
         if (preg_match('%<p\W*>\W*(.*)</p>%i', $ret, $regs)) {
-
             $err = $regs[1];
-
             if (stripos($ret, "You're almost done!") === 0) {
-
                 ebaylog("Requires immediate PayPal payment.");
 
                 //set it to success
 
                 $success = true;
-
                 goto end;
-
             } else {
-
                 test_write($ret);
-
             }
 
          
 
         } else if (preg_match('%<div class="statusDiv">(.*?)</div>%', $ret, $regs)) {
-
             $err = $regs[1];
-
             ebaylog("'{$err}'");
-
             //if string starts with "Enter US $0.41 or more"
-
             if (stripos($err, 'Transaction Blocked') === 0) {
-
                 ebaylog("{$item}: 'Transaction Blocked' found, aborting");
-
                 //set it to success
-
                 $success = true;
-
             } else {
-
                 test_write($ret);
-
             }
 
              
 
         } else if (preg_match('%"\d*" - Invalid Item</div>%', $ret)) {
-
             ebaylog("{$item}: 'Invalid Item' found, aborting");
 
             test_write($ret);
