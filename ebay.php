@@ -14,7 +14,7 @@ function place_bin($username, $password, $item, $link) {
 
  
 
-   $cookies = dirname(__DIR__).'/cookies.txt';
+   $cookies = dirname(__FILE__).'/cookies.txt';
 //$cookies = include('./cookies.txt');
      
 
